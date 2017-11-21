@@ -55,9 +55,9 @@ app.get('/message',login.message);
 app.post('/notification',notification.notification);
 app.post('/getMessagesapi',api.getmessages);
 app.post('/create', login.create);
-app.post('/loginapi',api.login);
-app.post('/logoutapi',api.logout);
-app.post('/answerapi',api.answer);
+app.post('/notifyloginapi',api.login);
+app.post('/notifylogoutapi',api.logout);
+app.post('/notifyanswerapi',api.answer);
 // app.get('/message',message.message);
 
 
