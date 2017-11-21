@@ -6,7 +6,7 @@ var message;
 exports.login = function(req,res){
   var email= req.body.email;
   var password = req.body.password;
-
+  var deviceToken = req.body.deviceToken;
   connection.query('SELECT * FROM patient WHERE email = ? && password = ?',[email,password], function (error, results, fields) {
   if (error) {
     message = "error occured";
@@ -24,7 +24,7 @@ exports.login = function(req,res){
           "gender":results[0].gender
         };
         var token = jwt.sign(user, 'superSecret');
-        connection.query('UPDATE patient set token = ? where email = ?',[token,email], function (error, results, fields){
+        connection.query('UPDATE patient set token = ?, device = ? where email = ?',[token,deviceToken,email], function (error, results, fields){
           if(error){
             message = "UserName and password does not match";
             res.send({
