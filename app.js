@@ -1,7 +1,7 @@
 var express = require("express");
 var login = require('./routes/loginroutes');
 var notification = require('./agent/hello')
-// var api = require('./routes/apiroutes');
+var api = require('./routes/apiroutes');
 // var patient = require('./routes/patientroutes');
 // var message = require('./routes/messageroutes')
 var bodyParser = require('body-parser');
@@ -53,11 +53,11 @@ app.get('/newMessage',function(req,res){
 app.post('/login', login.login);
 app.get('/message',login.message);
 app.post('/notification',notification.notification);
-// app.post('/surveyofpatient',patient.surveyofpatient);
+app.post('/getMessagesapi',api.getmessages);
 app.post('/create', login.create);
-// app.post('/loginapi',api.login);
-// app.post('/surveyapi',api.survey);
-// app.post('/deviceapi',api.device);
+app.post('/loginapi',api.login);
+app.post('/logoutapi',api.logout);
+app.post('/answerapi',api.answer);
 // app.get('/message',message.message);
 
 

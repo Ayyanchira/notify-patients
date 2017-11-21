@@ -14,8 +14,10 @@
     <!-- Bootstrap core CSS -->
     <link href="../node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
     <!-- Custom styles for this template -->
     <script type="text/javascript" src="../node_modules/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
     <style type="text/css">
       .table-container
@@ -32,6 +34,23 @@
 
     </style>
     <script type="text/javascript">
+    toastr.options = {
+      "closeButton": false,
+      "debug": false,
+      "newestOnTop": false,
+      "progressBar": false,
+      "positionClass": "toast-top-right",
+      "preventDuplicates": false,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "1000",
+      "timeOut": "5000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "fadeIn",
+      "hideMethod": "fadeOut"
+    }
     function notification(id,type,message) {
         $.ajax({
           url: '/notification',
@@ -42,13 +61,41 @@
             status:'',
             time:''
           },
-          error: function() {
+          error: function(data) {
+            console.log(data);
              $('body').html('<p>An error has occurred</p>');
+          },
+          success:function(){
+            console.log("success");
+            toastr.success('Notification sent');
           },
           dataType:'json',
           type:'POST'
       });
     }
+
+    function scheduleHourly(id,type,message) {
+        $.ajax({
+          url: '/notification',
+          data:{
+            id:id,
+            type:type,
+            message:message,
+            status:'Hourly',
+            time:''
+          },
+          error: function() {
+             $('body').html('<p>An error has occurred</p>');
+          },
+          success:function(){
+            console.log("success");
+            toastr.success('Notification is Scheduled Hourly');
+          },
+          dataType:'json',
+          type:'POST'
+      });
+    }
+
     function scheduleDaily(e,id,type,message) {
        console.log(e);
        var timeVal = document.getElementById(e.id).value;
@@ -69,10 +116,48 @@
           error: function() {
              $('body').html('<p>An error has occurred</p>');
           },
+          success:function(){
+            console.log("success");
+            toastr.success('Notification is scheduled Daily');
+          },
           dataType:'json',
           type:'POST'
       });
     }
+
+    function scheduleTwice(e,id,type,message) {
+       console.log(e);
+       var timeid1 = e.id.replace('daily','daily1');
+       var timeid2 = e.id.replace('daily','daily2')
+       var timeVal1 = document.getElementById(timeid1).value;
+       var timeVal2 = document.getElementById(timeid2).value;
+       if(timeVal1 == "" || timeVal2 == "")
+       {
+         alert('Please Select the both time of Items to Notify');
+         return;
+       }
+        $.ajax({
+          url: '/notification',
+          data:{
+            id:id,
+            type:type,
+            message:message,
+            status:'DailyTwice',
+            time1:timeVal1,
+            time2:timeVal2
+          },
+          error: function() {
+             $('body').html('<p>An error has occurred</p>');
+          },
+          success:function(){
+            console.log("success");
+            toastr.success('Notification is scheduled twice a Day');
+          },
+          dataType:'json',
+          type:'POST'
+      });
+    }
+
     $( document ).ready(function() {
       console.log( "ready!" );
       $.ajax({
@@ -90,11 +175,17 @@
                 for (var i = 0; i < dataSet.messages.length; i++) {
                   var msg = dataSet.messages[i]['message'].replace(/\s/g,"&nbsp;");
                   var notify = "<input type='button' value='Notify'onclick=notification("+dataSet.messages[i]['id']+",\'"+dataSet.messages[i]['type']+"\',\'"+msg+"\'"+")>";
-                  var scheduleHourly = "<input type='button' value='Hourly'onclick=notification("+dataSet.messages[i]['id']+",\'"+dataSet.messages[i]['type']+"\',\'"+msg+"\'"+")>";
+                  var scheduleHourly = "<input type='button' value='Hourly'onclick=scheduleHourly("+dataSet.messages[i]['id']+",\'"+dataSet.messages[i]['type']+"\',\'"+msg+"\'"+")>";
                   var scheduleDaily = "<input type='time' value='' id='daily_"+i+"'> "+"&nbsp; &nbsp;";
                   var btnScheduleDaily = "<input type='button' id='daily_"+i+"' value='Daily'onclick=scheduleDaily(this,"+dataSet.messages[i]['id']+",\'"+dataSet.messages[i]['type']+"\',\'"+msg+"\'"+")>";
                   scheduleDaily = scheduleDaily + btnScheduleDaily;
-                  var message = [dataSet.messages[i]["type"],dataSet.messages[i]["message"],dataSet.messages[i]["answer"],notify,scheduleHourly,scheduleDaily];
+
+                  var scheduleTwice = "<input type='time' value='' id='daily1_"+i+"'> "+"&nbsp; &nbsp;";
+                  var scheduleTwice = scheduleTwice + "<input type='time' value='' id='daily2_"+i+"'> "+"&nbsp; &nbsp;";
+                  var btnScheduleTwice = "<input type='button' id='daily_"+i+"' value='Daily Twice'onclick=scheduleTwice(this,"+dataSet.messages[i]['id']+",\'"+dataSet.messages[i]['type']+"\',\'"+msg+"\'"+")>";
+                  var scheduleTwice = scheduleTwice + btnScheduleTwice;
+
+                  var message = [dataSet.messages[i]["type"],dataSet.messages[i]["message"],dataSet.messages[i]["answer"],notify,scheduleHourly,scheduleDaily,scheduleTwice];
                   messages.push(message);
                 }
                 $('#table-messages').DataTable( {
